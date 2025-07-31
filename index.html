@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical 3D Volume Imaging Tool</title>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>Medical 3D Volume Imaging Tool</h1>
+            <p>Advanced 3D volume rendering with Cornerstone3D - Upload multiple DICOM files for volume visualization</p>
+        </header>
+        
+        <main class="main">
+            <div class="controls">
+                <div class="file-upload">
+                    <label for="dicom-file" class="upload-btn">
+                        Upload DICOM Files (Multiple)
+                        <input type="file" id="dicom-file" accept=".dcm,.dicom" multiple style="display: none;">
+                    </label>
+                    <span class="upload-hint">Select multiple DICOM files from the same series for 3D volume</span>
+                </div>
+                
+                <div class="tools-3d">
+                    <div class="tool-group">
+                        <label>3D Tools:</label>
+                        <button id="rotate-tool" class="tool-btn active">Rotate</button>
+                        <button id="pan-tool" class="tool-btn">Pan</button>
+                        <button id="zoom-tool" class="tool-btn">Zoom</button>
+                        <button id="opacity-tool" class="tool-btn">Opacity</button>
+                    </div>
+                    
+                    <div class="volume-controls">
+                        <label for="opacity-slider">Opacity:</label>
+                        <input type="range" id="opacity-slider" min="0" max="1" step="0.1" value="0.5">
+                        
+                        <label for="rendering-mode">Mode:</label>
+                        <select id="rendering-mode">
+                            <option value="VR">Volume Rendering</option>
+                            <option value="MIP">Max Intensity</option>
+                            <option value="MinIP">Min Intensity</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="viewer-container">
+                <div id="cornerstone-viewport" class="viewport">
+                    <div class="loading-message">
+                        Upload multiple DICOM files to begin 3D volume viewing
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div id="volume-info" class="volume-info">
+                    <h3>Volume Information</h3>
+                    <div class="info-item">
+                        <span class="label">Patient:</span>
+                        <span id="patient-name" class="value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Study Date:</span>
+                        <span id="study-date" class="value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Modality:</span>
+                        <span id="modality" class="value">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Dimensions:</span>
+                        <span id="dimensions" class="value">-</span>
+                    </div>
+                </div>
+                
+                <div class="shortcuts-info">
+                    <h4>Keyboard Shortcuts</h4>
+                    <div class="shortcut-item">
+                        <span class="key">R</span> - Rotate tool
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="key">P</span> - Pan tool
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="key">Z</span> - Zoom tool
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="key">O</span> - Opacity tool
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="key">F</span> - Reset view
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="key">1-3</span> - Rendering modes
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>3D Controls</h3>
+                <div class="control-row">
+                    <button id="reset-camera" class="btn btn-secondary">
+                        Reset View
+                    </button>
+                    <button id="random-rotation" class="btn btn-secondary">
+                        Random Rotation
+                    </button>
+                </div>
+                
+                <div class="control-row">
+                    <h4>Preset Views:</h4>
+                </div>
+                <div class="control-row">
+                    <button id="view-anterior" class="btn btn-preset">Anterior</button>
+                    <button id="view-posterior" class="btn btn-preset">Posterior</button>
+                    <button id="view-left" class="btn btn-preset">Left</button>
+                    <button id="view-right" class="btn btn-preset">Right</button>
+                </div>
+                <div class="control-row">
+                    <button id="view-superior" class="btn btn-preset">Superior</button>
+                    <button id="view-inferior" class="btn btn-preset">Inferior</button>
+                </div>
+                
+                <div class="control-row">
+                    <h4>Manual Rotation:</h4>
+                </div>
+                <div class="control-row">
+                    <button id="rotate-x-pos" class="btn btn-rotate">X+ 15°</button>
+                    <button id="rotate-x-neg" class="btn btn-rotate">X- 15°</button>
+                    <button id="rotate-y-pos" class="btn btn-rotate">Y+ 15°</button>
+                    <button id="rotate-y-neg" class="btn btn-rotate">Y- 15°</button>
+                    <button id="rotate-z-pos" class="btn btn-rotate">Z+ 15°</button>
+                    <button id="rotate-z-neg" class="btn btn-rotate">Z- 15°</button>
+                </div>
+                
+                <div class="control-row">
+                    <label>
+                        <input type="checkbox" id="enable-rotation" checked> 
+                        Enable Mouse Rotation
+                    </label>
+                </div>
+                
+                <div class="control-group">
+                    <label for="preset-selector">3D Presets:</label>
+                    <select id="preset-selector" class="control-select">
+                        <option value="default">Select Preset...</option>
+                        <option value="ct-bone">CT Bone (B)</option>
+                        <option value="ct-soft-tissue">CT Soft Tissue (S)</option>
+                        <option value="ct-lung">CT Lung (L)</option>
+                        <option value="ct-angiography">CT Angiography (A)</option>
+                        <option value="mri-brain">MRI Brain (M)</option>
+                        <option value="pet-scan">PET Scan</option>
+                        <option value="contrast-enhanced">Contrast Enhanced</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Thêm vào controls panel trong HTML file -->
+            <div class="control-section">
+                <h3>Window Level</h3>
+                
+                <!-- Window Center Control -->
+                <div class="control-group">
+                    <label for="window-center-slider">
+                        Window Center: <span id="window-center-value">50</span>
+                    </label>
+                    <input type="range" id="window-center-slider" 
+                           min="-2000" max="2000" value="50" step="1" 
+                           class="control-slider">
+                </div>
+                
+                <!-- Window Width Control -->
+                <div class="control-group">
+                    <label for="window-width-slider">
+                        Window Width: <span id="window-width-value">400</span>
+                    </label>
+                    <input type="range" id="window-width-slider" 
+                           min="1" max="4000" value="400" step="1" 
+                           class="control-slider">
+                </div>
+                
+                <!-- Window Level Presets -->
+                <div class="control-group">
+                    <label>Window Presets:</label>
+                    <div class="preset-buttons">
+                        <button id="window-bone" class="preset-btn">Bone</button>
+                        <button id="window-soft-tissue" class="preset-btn">Soft Tissue</button>
+                        <button id="window-lung" class="preset-btn">Lung</button>
+                        <button id="window-brain" class="preset-btn">Brain</button>
+                        <button id="window-liver" class="preset-btn">Liver</button>
+                        <button id="window-mediastinum" class="preset-btn">Mediastinum</button>
+                    </div>
+                    <button id="reset-window-level" class="control-btn reset-btn">Reset</button>
+                </div>
+            </div>
+        </main>
+        
+
+    </div> <script type="module" src="./index.js"></script>
+
+</body>
+</html>
