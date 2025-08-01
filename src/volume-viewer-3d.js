@@ -700,20 +700,14 @@ setActiveTool(toolName) {
         }
 
         try {
-            // Use Cornerstone3D's preset system instead of direct VTK manipulation
-            if (preset.name === 'CT Bone') {
-                this.viewport.setProperties({ preset: 'CT-Bone' });
-            } else if (preset.name === 'CT Soft Tissue') {
-                this.viewport.setProperties({ preset: 'CT-Soft-Tissue' });
-            } else if (preset.name === 'CT Lung') {
-                this.viewport.setProperties({ preset: 'CT-Lung' });
-            } else if (preset.name === 'CT Angiography') {
-                this.viewport.setProperties({ preset: 'CT-Angiography' });
-            } else if (preset.name === 'MRI Brain') {
-                this.viewport.setProperties({ preset: 'MR-Default' });
-            } else {
-                // For custom presets, use Cornerstone3D's transfer function API
-                this.applyCustomPreset(preset);
+            // 1. Apply window level first
+            if (preset.windowLevel) {
+                this.setWindowLevel(preset.windowLevel.width, preset.windowLevel.center);
+            }
+
+            // 2. Apply RGB color mapping using scalar values
+            if (preset.colorPoints && preset.colorPoints.length > 0) {
+                this.setRGBTransferFunction(preset.colorPoints);
             }
 
             // Apply global opacity if specified
@@ -721,19 +715,8 @@ setActiveTool(toolName) {
                 this.setVolumeOpacity(preset.opacity);
             }
 
-            // Apply window level if provided
-            if (preset.windowLevel) {
-                const { width, center } = preset.windowLevel;
-                this.viewport.setProperties({
-                    voiRange: {
-                        lower: center - width / 2,
-                        upper: center + width / 2
-                    }
-                });
-            }
-
             // Render the changes
-            this.viewport.render();
+            //this.viewport.render();
             
             console.log(`Applied 3D preset: ${preset.name}`);
             
@@ -1150,21 +1133,90 @@ setActiveTool(toolName) {
         }
 
         try {
-            // Apply window level using Cornerstone3D's VOI (Value of Interest) range
-            this.viewport.setProperties({
-                voiRange: {
-                    lower: center - width / 2,
-                    upper: center + width / 2
+
+            // Lấy actors từ viewport
+            const actors = this.viewport.getActors();
+            if (actors && actors.length > 0) {
+                const volumeActor = actors[0]; // Lấy volume actor đầu tiên
+                console.log('Volume actor found:', volumeActor);
+                if (volumeActor && volumeActor.actor) {
+                    console.log('Setting window level on volume actor:', volumeActor);
+                    const property = volumeActor.actor.getProperty();
+
+                    // Truy cập ScalarOpacity transfer function theo VTK
+                    const scalarOpacity = property.getScalarOpacity(0);
+                    
+                    // Xóa tất cả các điểm cũ
+                    scalarOpacity.removeAllPoints();
+                    
+                    // Thêm các điểm mới cho window level
+                    const windowMin = center - width / 2;
+                    const windowMax = center + width / 2;
+                    
+                    // Tạo gradient opacity dựa trên window level
+                    scalarOpacity.addPoint(windowMin, 0.0);                // Bắt đầu window
+                    scalarOpacity.addPoint(windowMax, 1.0);                // Kết thúc window
+                    
+                    // Cập nhật lại opacity
+                    property.setScalarOpacity(0, scalarOpacity);
+
+                    this.viewport.render();
+                    
+                    console.log(`Window level: Width=${width}, Center=${center}`);
+                    
                 }
-            });
+            }
             
-            this.viewport.render();
-            console.log(`Window level set: Width=${width}, Center=${center}`);
             
         } catch (error) {
             console.error('Error setting window level:', error);
         }
     }
+
+     /**
+     * Set RGB transfer function (color mapping)
+     * @param {Array} colorPoints - Array of {value, r, g, b} points
+     */
+    setRGBTransferFunction(colorPoints) {
+        if (!this.viewport || !this.currentVolumeData) {
+            console.warn('No volume available for color adjustment');
+            return;
+        }
+
+        try {
+            const actors = this.viewport.getActors();
+            if (actors && actors.length > 0) {
+                const volumeActor = actors[0];
+                
+                if (volumeActor && volumeActor.actor) {
+                    const property = volumeActor.actor.getProperty();
+
+                    if (property && property.getRGBTransferFunction) {
+                        const rgbTransferFunction = property.getRGBTransferFunction(0);
+                        
+                        // Xóa tất cả các điểm cũ
+                        rgbTransferFunction.removeAllPoints();
+                        
+                        // Thêm các điểm màu mới với scalar values
+                        colorPoints.forEach(point => {
+                            rgbTransferFunction.addRGBPoint(
+                                point.value,        // Scalar value (HU)
+                                point.color[0],     // Red
+                                point.color[1],     // Green
+                                point.color[2]      // Blue
+                            );
+                        });
+                        
+                        this.viewport.render();
+                        console.log('RGB transfer function applied:', colorPoints);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error setting RGB transfer function:', error);
+        }
+    }
+
 
     /**
      * Get current window level settings

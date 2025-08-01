@@ -254,13 +254,13 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
 
     apply3DPreset(presetName) {
         const presets = {
-            'ct-bone': {
+  'ct-bone': {
                 name: 'CT Bone',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.2, color: [0.8, 0.6, 0.4, 0.1] },
-                    { position: 0.5, color: [1.0, 0.9, 0.8, 0.3] },
-                    { position: 1.0, color: [1.0, 1.0, 1.0, 1.0] }
+                    { value: -1000, color: [0, 0, 0, 0] },        // Air - completely transparent
+                    { value: 200, color: [0.8, 0.6, 0.4, 0.1] },  // Bone start - light brown
+                    { value: 800, color: [1.0, 0.9, 0.8, 0.3] },  // Cortical bone - ivory
+                    { value: 2000, color: [1.0, 1.0, 1.0, 1.0] }  // Dense bone - white
                 ],
                 windowLevel: { width: 2000, center: 300 },
                 opacity: 0.7
@@ -268,10 +268,10 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'ct-soft-tissue': {
                 name: 'CT Soft Tissue',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.3, color: [0.6, 0.4, 0.3, 0.2] },
-                    { position: 0.7, color: [0.9, 0.7, 0.6, 0.5] },
-                    { position: 1.0, color: [1.0, 0.8, 0.7, 0.8] }
+                    { value: -100, color: [0, 0, 0, 0] },          // Air/lung - transparent
+                    { value: 0, color: [0.6, 0.4, 0.3, 0.2] },    // Water - brown
+                    { value: 100, color: [0.9, 0.7, 0.6, 0.5] },  // Soft tissue - pink
+                    { value: 200, color: [1.0, 0.8, 0.7, 0.8] }   // Dense tissue - light pink
                 ],
                 windowLevel: { width: 400, center: 50 },
                 opacity: 0.6
@@ -279,10 +279,10 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'ct-lung': {
                 name: 'CT Lung',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.1, color: [0.2, 0.3, 0.6, 0.1] },
-                    { position: 0.4, color: [0.4, 0.6, 0.8, 0.3] },
-                    { position: 1.0, color: [0.8, 0.9, 1.0, 0.7] }
+                    { value: -1000, color: [0, 0, 0, 0] },         // Air - transparent
+                    { value: -800, color: [0.2, 0.3, 0.6, 0.1] }, // Lung parenchyma - blue
+                    { value: -300, color: [0.4, 0.6, 0.8, 0.3] }, // Airways - light blue
+                    { value: 100, color: [0.8, 0.9, 1.0, 0.7] }   // Vessels/tissue - cyan
                 ],
                 windowLevel: { width: 1500, center: -600 },
                 opacity: 0.5
@@ -290,10 +290,10 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'ct-angiography': {
                 name: 'CT Angiography',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.2, color: [0.3, 0.1, 0.1, 0.1] },
-                    { position: 0.6, color: [0.8, 0.2, 0.2, 0.4] },
-                    { position: 1.0, color: [1.0, 0.4, 0.4, 0.9] }
+                    { value: -100, color: [0, 0, 0, 0] },          // Background - transparent
+                    { value: 100, color: [0.3, 0.1, 0.1, 0.1] },  // Low enhancement - dark red
+                    { value: 300, color: [0.8, 0.2, 0.2, 0.4] },  // Vessels - red
+                    { value: 500, color: [1.0, 0.4, 0.4, 0.9] }   // High enhancement - bright red
                 ],
                 windowLevel: { width: 600, center: 100 },
                 opacity: 0.8
@@ -301,10 +301,10 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'mri-brain': {
                 name: 'MRI Brain',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.25, color: [0.2, 0.2, 0.4, 0.2] },
-                    { position: 0.6, color: [0.6, 0.6, 0.8, 0.5] },
-                    { position: 1.0, color: [0.9, 0.9, 1.0, 0.8] }
+                    { value: 0, color: [0, 0, 0, 0] },             // CSF - transparent
+                    { value: 64, color: [0.2, 0.2, 0.4, 0.2] },   // Gray matter - dark blue
+                    { value: 153, color: [0.6, 0.6, 0.8, 0.5] },  // White matter - blue-gray
+                    { value: 255, color: [0.9, 0.9, 1.0, 0.8] }   // Bright areas - light gray
                 ],
                 windowLevel: { width: 255, center: 128 },
                 opacity: 0.7
@@ -312,11 +312,11 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'pet-scan': {
                 name: 'PET Scan',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.3, color: [0, 0, 1, 0.3] },
-                    { position: 0.6, color: [0, 1, 0, 0.6] },
-                    { position: 0.8, color: [1, 1, 0, 0.8] },
-                    { position: 1.0, color: [1, 0, 0, 1.0] }
+                    { value: 0, color: [0, 0, 0, 0] },             // No activity - transparent
+                    { value: 1500, color: [0, 0, 1, 0.3] },       // Low activity - blue
+                    { value: 3000, color: [0, 1, 0, 0.6] },       // Moderate activity - green
+                    { value: 4000, color: [1, 1, 0, 0.8] },       // High activity - yellow
+                    { value: 5000, color: [1, 0, 0, 1.0] }        // Maximum activity - red
                 ],
                 windowLevel: { width: 5000, center: 2500 },
                 opacity: 0.9
@@ -324,11 +324,11 @@ document.getElementById('reset-window-level')?.addEventListener('click', () => {
             'contrast-enhanced': {
                 name: 'Contrast Enhanced',
                 colorPoints: [
-                    { position: 0.0, color: [0, 0, 0, 0] },
-                    { position: 0.15, color: [0.1, 0.1, 0.3, 0.1] },
-                    { position: 0.4, color: [0.3, 0.5, 0.8, 0.4] },
-                    { position: 0.7, color: [0.7, 0.8, 1.0, 0.7] },
-                    { position: 1.0, color: [1.0, 1.0, 1.0, 1.0] }
+                    { value: -100, color: [0, 0, 0, 0] },          // Background - transparent
+                    { value: 50, color: [0.1, 0.1, 0.3, 0.1] },   // Low enhancement - dark blue
+                    { value: 200, color: [0.3, 0.5, 0.8, 0.4] },  // Moderate enhancement - blue
+                    { value: 400, color: [0.7, 0.8, 1.0, 0.7] },  // High enhancement - light blue
+                    { value: 600, color: [1.0, 1.0, 1.0, 1.0] }   // Maximum enhancement - white
                 ],
                 windowLevel: { width: 1000, center: 200 },
                 opacity: 0.75
